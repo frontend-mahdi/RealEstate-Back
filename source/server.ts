@@ -1,35 +1,41 @@
-import bodyParser from 'body-parser';
-import express from 'express';
-import http from 'http';
-import mongoose from 'mongoose';
-import config from './config/config';
-import logging from './config/logging';
-import bookRoutes from './routes/book';
+import bodyParser from "body-parser";
+import express from "express";
+import http from "http";
+import mongoose from "mongoose";
+import config from "./config/config";
+import logging from "./config/logging";
+import bookRoutes from "./routes/book";
 
-const NAMESPACE = 'Server';
+const NAMESPACE = "Server";
 const router = express();
 
 /** Connect to Mongo */
 mongoose
-    .connect(config.mongo.url, config.mongo.options)
-    .then((result) => {
-        logging.info(NAMESPACE, 'Mongo Connected');
-    })
-    .catch((error) => {
-        logging.error(NAMESPACE, error.message, error);
-    });
+  .connect(config.mongo.url, config.mongo.options)
+  .then((result) => {
+    logging.info(NAMESPACE, "Mongo Connected");
+  })
+  .catch((error) => {
+    logging.error(NAMESPACE, error.message, error);
+  });
 
 /** Log the request */
 router.use((req, res, next) => {
-    /** Log the req */
-    logging.info(NAMESPACE, `METHOD: [${req.method}] - URL: [${req.url}] - IP: [${req.socket.remoteAddress}]`);
+  /** Log the req */
+  logging.info(
+    NAMESPACE,
+    `METHOD: [${req.method}] - URL: [${req.url}] - IP: [${req.socket.remoteAddress}]`,
+  );
 
-    res.on('finish', () => {
-        /** Log the res */
-        logging.info(NAMESPACE, `METHOD: [${req.method}] - URL: [${req.url}] - STATUS: [${res.statusCode}] - IP: [${req.socket.remoteAddress}]`);
-    });
+  res.on("finish", () => {
+    /** Log the res */
+    logging.info(
+      NAMESPACE,
+      `METHOD: [${req.method}] - URL: [${req.url}] - STATUS: [${res.statusCode}] - IP: [${req.socket.remoteAddress}]`,
+    );
+  });
 
-    next();
+  next();
 });
 
 /** Parse the body of the request */
@@ -38,29 +44,37 @@ router.use(bodyParser.json());
 
 /** Rules of our API */
 router.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+  );
 
-    if (req.method == 'OPTIONS') {
-        res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
-        return res.status(200).json({});
-    }
+  if (req.method == "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
+    return res.status(200).json({});
+  }
 
-    next();
+  next();
 });
 
 /** Routes go here */
-router.use('/api/books', bookRoutes);
+router.use("/api/books", bookRoutes);
 
 /** Error handling */
 router.use((req, res, next) => {
-    const error = new Error('Not found');
+  const error = new Error("Not found");
 
-    res.status(404).json({
-        message: error.message
-    });
+  res.status(404).json({
+    message: error.message,
+  });
 });
 
 const httpServer = http.createServer(router);
 
-httpServer.listen(config.server.port, () => logging.info(NAMESPACE, `Server is running ${config.server.hostname}:${config.server.port}`));
+httpServer.listen(config.server.port, () =>
+  logging.info(
+    NAMESPACE,
+    `Server is running ${config.server.hostname}:${config.server.port}`,
+  ),
+);
