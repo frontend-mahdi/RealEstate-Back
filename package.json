@@ -4,7 +4,9 @@
   "description": "",
   "main": "source/server.ts",
   "scripts": {
-    "build": "rm -rf build && npx prettier --write source/ && npx tsc"
+    "build": "rm -rf build && npx prettier --write source/ && npx tsc",
+    "bStart": "rm -rf build && npx prettier --write source/ && npx tsc && node ./build/server.js",
+    "dev": "node ./build/server.js"
   },
   "author": "",
   "license": "ISC",
